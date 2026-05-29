@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark md2html Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #090d16;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --card-bg: #111827;
+            --border-color: #1f2937;
+            --code-bg: #1f2937;
+            --code-text: #f3f4f6;
+            --quote-bg: #1f2937;
+            --quote-border: #38bdf8;
+            --font-main: 'Inter', sans-serif;
+            --font-title: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        body {
+            font-family: var(--font-main, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Neon theme specific overrides */
+        :root[data-theme="neon"] .container {
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05);
+            border: 2px solid var(--border-color);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-title, var(--font-main, inherit));
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 1rem; }
+        h2 { font-size: 1.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem; }
+        h3 { font-size: 1.4rem; }
+        h4 { font-size: 1.15rem; }
+        
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dashed var(--primary);
+            padding-bottom: 1px;
+            transition: all 0.2s ease;
+        }
+        a:hover {
+            color: var(--primary-hover);
+            border-bottom: 1px solid var(--primary-hover);
+        }
+        
+        p {
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+        
+        blockquote {
+            margin: 1.5rem 0;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--quote-bg);
+            border-left: 4px solid var(--quote-border);
+            border-radius: 4px;
+            font-style: italic;
+            color: var(--text-color);
+        }
+        blockquote p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            padding-left: 2rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+        }
+        li p {
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Code styling */
+        code {
+            font-family: var(--font-mono, 'Fira Code', 'Courier New', Courier, monospace);
+            font-size: 0.9em;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+        }
+        
+        /* Fenced Code Block */
+        pre {
+            background-color: var(--code-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 1.5rem 0;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: var(--code-text);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            display: block;
+        }
+        
+        /* Tables styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        /* Horizontal Rule */
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 2rem 0;
+        }
+        
+        /* Images */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+            margin: 1.5rem auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* Keyboard shortcut input style */
+        kbd {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+            color: var(--text-color);
+            display: inline-block;
+            font-family: inherit;
+            font-size: 0.85em;
+            line-height: 1.4;
+            margin: 0 0.1em;
+            padding: 0.1em 0.6em;
+            text-shadow: 0 1px 0 #fff;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="container">
+<h1 id="modern-purebash-markdown-to-html-converter-md2html">Modern Pure-Bash Markdown to HTML Converter (<code>md2html</code>)</h1>
+
+<p>
+Welcome to <strong><code>md2html</code></strong>, a premium, feature-rich, and extremely portable Markdown-to-HTML converter written in pure Bash. It handles everything from complex tables and nested lists to multi-level blockquotes and custom visual themes!
+</p>
+
+<p>
+---
+</p>
+
+<h2 id="elegant-typography-responsive-elements">Elegant Typography &amp; Responsive Elements</h2>
+
+<p>
+This document is styled using the bundled <strong><code>modern</code></strong> theme. Notice the elegant Outfit/Jakarta typography, card shadow borders, customized code blocks, and subtle transitions.
+</p>
+
+<h3 id="core-features">Core Features</h3>
+
+<ul>
+<li><strong>Portability</strong>: Runs on macOS and Linux with zero external dependencies (pure Bash, sed, and awk).
+</li>
+<li><strong>High Coverage</strong>:
+<ul>
+<li>GFM Tables (with alignment)
+</li>
+<li>Nested Lists and Blockquotes
+</li>
+<li>Reference-style Links and Images
+</li>
+<li>Backslash Escaping
+</li>
+</ul>
+</li>
+<li><strong>Stunning Templates</strong>: Injects responsive CSS themes directly into the HTML!
+</li>
+</ul>
+
+<p>
+---
+</p>
+
+<h2 id="gfm-aligned-tables">GFM Aligned Tables</h2>
+
+<p>
+We support full GitHub Flavored Markdown (GFM) tables, beautifully formatted with precise cell alignment:
+</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align: left;">Feature</th>
+  <th style="text-align: center;">Coverage</th>
+  <th style="text-align: center;">Performance</th>
+  <th style="text-align: right;">Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align: left;">ATX &amp; Setext Headers</td>
+  <td style="text-align: center;">100%</td>
+  <td style="text-align: center;">Fast</td>
+  <td style="text-align: right;">High</td>
+</tr>
+<tr>
+  <td style="text-align: left;">Nested Lists</td>
+  <td style="text-align: center;">100%</td>
+  <td style="text-align: center;">Perfect</td>
+  <td style="text-align: right;">High</td>
+</tr>
+<tr>
+  <td style="text-align: left;">Code Syntax</td>
+  <td style="text-align: center;">100%</td>
+  <td style="text-align: center;">Ultra-Safe</td>
+  <td style="text-align: right;">Medium</td>
+</tr>
+<tr>
+  <td style="text-align: left;">Premium Styling</td>
+  <td style="text-align: center;">Customizable</td>
+  <td style="text-align: center;">Gorgeous</td>
+  <td style="text-align: right;">Optional</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+---
+</p>
+
+<h2 id="multilevel-nested-blockquotes">Multi-Level Nested Blockquotes</h2>
+
+<p>
+Blockquotes can be nested infinitely to represent conversational threads or layered citations:
+</p>
+
+<blockquote>
+<p>
+&quot;The Unix tool philosophy is simple: write programs that do one thing and do it well. Write programs to work together. Write programs to handle text streams, because that is a universal interface.&quot;
+</p>
+<blockquote>
+<p>
+-- Doug McIlroy, Inventor of Unix Pipes
+</p>
+</blockquote>
+
+<p>
+That&#39;s why building this converter in pure Bash is so satisfying!
+</p>
+</blockquote>
+
+<p>
+---
+</p>
+
+<h2 id="secure-escaped-code-block-formatting">Secure &amp; Escaped Code Block Formatting</h2>
+
+<p>
+Inside code blocks, HTML tags and characters are safely escaped to prevent scripting injections or malformed renders. Here&#39;s a Python snippet illustrating this:
+</p>
+
+<pre><code class="language-python">
+def make_premium_html(markdown_text):
+    # Safe and escaped rendering
+    html = md2html.convert(markdown_text)
+    print(f&quot;Rendering: {html[:40]}...&quot;)
+    return html
+</code></pre>
+
+<p>
+---
+</p>
+
+<h2 id="stunning-mermaidjs-diagrams">Stunning Mermaid.js Diagrams</h2>
+
+<p>
+Mermaid diagrams are rendered dynamically in standalone mode:
+</p>
+
+<div class="mermaid">
+graph LR
+    MD[Markdown Input] --> BSH[md2html.sh Parser]
+    BSH --> HTML[HTML Output]
+    HTML --> PR[PrismJS Highlighter]
+    HTML --> MM[MermaidJS Rendering]
+</div>
+
+<p>
+---
+</p>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<p>
+Convert a markdown file instantly:
+</p>
+<pre><code>
+# General usage
+./md2html.sh input.md &gt; output.html
+
+# Standalone with a dark theme
+./md2html.sh --standalone --theme dark --title &quot;My Docs&quot; input.md &gt; output.html
+</code></pre>
+
+<p>
+Developed with love by <strong>Antigravity</strong>. Enjoy rendering gorgeous pages!
+</p>
+    </div>
+    
+    <!-- PrismJS for high-quality language syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    
+    <!-- MermaidJS for stunning dynamic diagrams and flowcharts -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        const theme = document.body.getAttribute('data-theme') || 'modern';
+        const mermaidTheme = (theme === 'dark' || theme === 'neon') ? 'dark' : 'default';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: mermaidTheme,
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html>
