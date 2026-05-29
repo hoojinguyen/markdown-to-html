@@ -9,6 +9,11 @@ curl -fsSL https://raw.githubusercontent.com/hoojinguyen/markdown-to-html/main/i
 ```
 
 ## How to Use
+```bash
+md2html
+```
+
+You can also run it with options and input files:
 
 ```text
 Usage: md2html [options] [input-file]
@@ -16,8 +21,9 @@ Usage: md2html [options] [input-file]
 Options:
   -h, --help           Show this help message and exit
   -v, --version        Show version information
-  -s, --standalone     Generate a full HTML document (with <head> and styling)
-  -t, --theme THEME    Theme to use for standalone mode (modern, dark, neon, minimal, everforest) [default: modern]
+  -f, --fragment       Generate a raw HTML fragment (no <head> or styling)
+  -s, --standalone     Generate a full HTML document (with <head> and styling) [default]
+  -t, --theme THEME    Theme to use for standalone mode (everforest, modern, dark, neon, minimal) [default: everforest]
   --title TITLE        Set custom title for standalone HTML document [default: Markdown Document]
   -r, --raw-html       Allow raw HTML tags in Markdown input (otherwise escaped)
   -o, --output FILE    Write output to FILE instead of standard output
@@ -25,17 +31,17 @@ Options:
 
 ### Examples
 
-Convert a Markdown file into a clean HTML block snippet:
+Compile a Markdown file instantly into a styled HTML document (using `everforest` by default, saved to `document.html` at the same level):
 ```bash
-md2html document.md > render.html
+md2html document.md
 ```
 
-Compile a complete, self-contained HTML page using the "dark" theme:
+Compile a Markdown file into a styled HTML document with custom theme and title:
 ```bash
-md2html --standalone --theme dark --title "My API Docs" document.md -o index.html
+md2html --theme neon --title "My API Docs" document.md -o index.html
 ```
 
-Stream markdown content dynamically through standard input:
+Stream markdown content as an HTML fragment:
 ```bash
-cat release_notes.md | md2html --standalone --theme neon > release.html
+cat release_notes.md | md2html --fragment > release.html
 ```

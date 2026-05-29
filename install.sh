@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 
 # Print header
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
-echo -e "${BOLD}${MAGENTA}       🚀 Markdown-to-HTML Converter (md2html) Installer 🚀${NC}"
+echo -e "${BOLD}${MAGENTA}       Markdown-to-HTML Converter (md2html) Installer${NC}"
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
 echo ""
 
@@ -29,10 +29,10 @@ BUILD_SCRIPT="$SCRIPT_DIR/scripts/build.sh"
 # If build.sh is not found locally, we assume the script was executed via curl pipe
 # or downloaded standalone. We clone the repository into a temp directory and run it from there.
 if [[ ! -f "$BUILD_SCRIPT" ]]; then
-    echo -e "${BOLD}${BLUE}🌐 Running remote installation wrapper...${NC}"
+    echo -e "${BOLD}${BLUE}Running remote installation wrapper...${NC}"
     
     if ! command -v git >/dev/null 2>&1; then
-        echo -e "${RED}❌ Error: 'git' command not found. Git is required to fetch dependencies for remote installation.${NC}" >&2
+        echo -e "${RED}Error: 'git' command not found. Git is required to fetch dependencies for remote installation.${NC}" >&2
         echo -e "Please clone the repository manually instead:" >&2
         echo -e "  ${CYAN}git clone https://github.com/hoojinguyen/markdown-to-html.git${NC}" >&2
         exit 1
@@ -41,7 +41,7 @@ if [[ ! -f "$BUILD_SCRIPT" ]]; then
     TEMP_DIR=$(mktemp -d -t md2html-install-XXXXXX)
     echo -e "Fetching latest source code from GitHub..."
     if git clone --depth 1 https://github.com/hoojinguyen/markdown-to-html.git "$TEMP_DIR" >/dev/null 2>&1; then
-        echo -e "${GREEN}✓ Source code fetched successfully.${NC}"
+        echo -e "${GREEN}Source code fetched successfully.${NC}"
         # Execute the installer inside the temporary repository clone, passing along all args
         cd "$TEMP_DIR"
         ./install.sh "$@"
@@ -49,7 +49,7 @@ if [[ ! -f "$BUILD_SCRIPT" ]]; then
         rm -rf "$TEMP_DIR"
         exit 0
     else
-        echo -e "${RED}❌ Error: Failed to clone the repository from GitHub.${NC}" >&2
+        echo -e "${RED}Error: Failed to clone the repository from GitHub.${NC}" >&2
         rm -rf "$TEMP_DIR"
         exit 1
     fi
@@ -60,7 +60,7 @@ COMPILED_FILE="$SCRIPT_DIR/dist/md2html"
 # Step 1: Run the compilation process
 echo -e "${BOLD}${BLUE}[1/3] Compiling standalone executable...${NC}"
 if [[ ! -f "$BUILD_SCRIPT" ]]; then
-    echo -e "${RED}❌ Error: Build script not found at $BUILD_SCRIPT${NC}" >&2
+    echo -e "${RED}Error: Build script not found at $BUILD_SCRIPT${NC}" >&2
     exit 1
 fi
 
@@ -70,15 +70,15 @@ fi
 
 # Run the build script
 if ! "$BUILD_SCRIPT"; then
-    echo -e "${RED}❌ Error: Compilation failed!${NC}" >&2
+    echo -e "${RED}Error: Compilation failed!${NC}" >&2
     exit 1
 fi
 
 if [[ ! -f "$COMPILED_FILE" ]]; then
-    echo -e "${RED}❌ Error: Compiled executable not found at $COMPILED_FILE after build.${NC}" >&2
+    echo -e "${RED}Error: Compiled executable not found at $COMPILED_FILE after build.${NC}" >&2
     exit 1
 fi
-echo -e "${GREEN}✓ Compilation completed successfully!${NC}\n"
+echo -e "${GREEN}Compilation completed successfully!${NC}\n"
 
 # Step 2: Determine installation target directory
 echo -e "${BOLD}${BLUE}[2/3] Determining installation path...${NC}"
@@ -114,12 +114,12 @@ echo -e "${BOLD}${BLUE}[3/3] Copying executable to target...${NC}"
 SUCCESS=false
 
 if $USE_SUDO; then
-    echo -e "${YELLOW}🔑 Installing to $INSTALL_DIR/md2html requires administrator privileges...${NC}"
+    echo -e "${YELLOW}Installing to $INSTALL_DIR/md2html requires administrator privileges...${NC}"
     if sudo cp "$COMPILED_FILE" "$INSTALL_DIR/md2html" && sudo chmod +x "$INSTALL_DIR/md2html"; then
         SUCCESS=true
     else
-        echo -e "${RED}⚠️  Failed to install to $INSTALL_DIR/md2html using sudo.${NC}"
-        echo -e "${BLUE}🔄 Falling back to user-local directory ($HOME/.local/bin)...${NC}"
+        echo -e "${RED}Failed to install to $INSTALL_DIR/md2html using sudo.${NC}"
+        echo -e "${BLUE}Falling back to user-local directory ($HOME/.local/bin)...${NC}"
         INSTALL_DIR="$HOME/.local/bin"
         USE_SUDO=false
     fi
@@ -130,12 +130,12 @@ if ! $SUCCESS; then
     if cp "$COMPILED_FILE" "$INSTALL_DIR/md2html" && chmod +x "$INSTALL_DIR/md2html"; then
         SUCCESS=true
     else
-        echo -e "${RED}❌ Error: Failed to write to $INSTALL_DIR/md2html.${NC}" >&2
+        echo -e "${RED}Error: Failed to write to $INSTALL_DIR/md2html.${NC}" >&2
         exit 1
     fi
 fi
 
-echo -e "${GREEN}✓ Successfully installed 'md2html' executable to $INSTALL_DIR!${NC}\n"
+echo -e "${GREEN}Successfully installed 'md2html' executable to $INSTALL_DIR!${NC}\n"
 
 # Verify installation
 echo -e "${BOLD}${BLUE}Verifying installation...${NC}"
@@ -145,7 +145,7 @@ if [[ -x "$INSTALLED_BIN" ]]; then
     echo -e "Executable check: ${GREEN}OK${NC}"
     echo -e "Version info:     ${GREEN}${VERSION_OUT}${NC}\n"
 else
-    echo -e "${RED}❌ Verification failed: Installed binary is not executable.${NC}" >&2
+    echo -e "${RED}Verification failed: Installed binary is not executable.${NC}" >&2
     exit 1
 fi
 
@@ -185,12 +185,12 @@ esac
 
 # Success Output
 echo -e "${BOLD}${GREEN}======================================================================${NC}"
-echo -e "${BOLD}${GREEN}🎉 Congratulations! md2html has been successfully installed. 🎉${NC}"
+echo -e "${BOLD}${GREEN}Congratulations! md2html has been successfully installed.${NC}"
 echo -e "${BOLD}${GREEN}======================================================================${NC}"
 echo ""
 
 if ! $PATH_INCLUDED; then
-    echo -e "${BOLD}${YELLOW}⚠️  Important Path Configuration Required:${NC}"
+    echo -e "${BOLD}${YELLOW}Important Path Configuration Required:${NC}"
     echo -e "The installation directory ${CYAN}$INSTALL_DIR${NC} is not currently in your system ${BOLD}PATH${NC}."
     echo -e "To run ${BOLD}md2html${NC} directly from any terminal window, run this command or add it to your configuration:"
     echo ""
@@ -198,20 +198,23 @@ if ! $PATH_INCLUDED; then
     echo -e "  ${BOLD}${CYAN}source ${SHELL_CONFIG}${NC}"
     echo ""
 else
-    echo -e "${GREEN}✓ Great news! $INSTALL_DIR is already in your PATH!${NC}"
+    echo -e "${GREEN}Great news! $INSTALL_DIR is already in your PATH!${NC}"
     echo -e "You can run the tool from anywhere using the command: ${BOLD}${CYAN}md2html${NC}"
     echo ""
 fi
 
 echo -e "${BOLD}Quick Usage Examples:${NC}"
-echo -e "  📄 Convert Markdown to raw HTML:"
-echo -e "     ${CYAN}md2html document.md > render.html${NC}"
+echo -e "  Start Keyboard-Interactive CLI UI wizard (lists local files):"
+echo -e "     ${CYAN}md2html${NC}"
 echo ""
-echo -e "  🎨 Convert to beautiful standalone HTML with 'dark' theme:"
-echo -e "     ${CYAN}md2html --standalone --theme dark document.md -o render.html${NC}"
+echo -e "  Compile Markdown instantly to styled HTML (with Everforest theme and clickable link):"
+echo -e "     ${CYAN}md2html document.md${NC}"
 echo ""
-echo -e "  🚀 Stream Markdown through standard input (stdin):"
-echo -e "     ${CYAN}cat document.md | md2html --standalone --theme neon > render.html${NC}"
+echo -e "  Compile document with custom theme (modern, dark, neon, minimal, everforest):"
+echo -e "     ${CYAN}md2html --theme neon document.md${NC}"
+echo ""
+echo -e "  Stream Markdown through stdin as HTML fragment:"
+echo -e "     ${CYAN}cat document.md | md2html --fragment > render.html${NC}"
 echo ""
 echo -e "Run ${BOLD}${CYAN}md2html --help${NC} to see all available options."
 echo -e "${BOLD}${CYAN}======================================================================${NC}"

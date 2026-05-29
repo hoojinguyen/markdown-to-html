@@ -56,9 +56,15 @@ awk '
   { print }
 ' "$SRC_DIR/inline_transform.sh" > "$TEMP_BUILD_DIR/inline_transform.sh"
 
+# 5b. Extract and prepare interactive.sh (stripping shebang)
+grep -v '^#!' "$SRC_DIR/interactive.sh" > "$TEMP_BUILD_DIR/interactive.sh"
+
+# 5c. Extract and prepare block_parser.sh (stripping shebang)
+grep -v '^#!' "$SRC_DIR/block_parser.sh" > "$TEMP_BUILD_DIR/block_parser.sh"
+
 # 6. Inline registries and libraries into the main script using safe temp files
 awk -v build_dir="$TEMP_BUILD_DIR" '
-  BEGIN { themes_replaced=0; inline_replaced=0; skip_themes=0; skip_inline=0 }
+  BEGIN { themes_replaced=0; inline_replaced=0; interactive_replaced=0; block_parser_replaced=0; skip_themes=0; skip_inline=0; skip_interactive=0; skip_block=0 }
   
   /if \[\[ -f "\$SCRIPT_DIR\/themes.sh" \]\]; then/ {
       skip_themes=1
@@ -101,6 +107,38 @@ awk -v build_dir="$TEMP_BUILD_DIR" '
   }
   skip_inline && /^fi$/ { skip_inline=0; next }
   skip_inline { next }
+
+  /if \[\[ -f "\$SCRIPT_DIR\/interactive.sh" \]\]; then/ {
+      skip_interactive=1
+      if (!interactive_replaced) {
+          print ""
+          print "# =============================================================================="
+          print "# EMBEDDED KEYBOARD INTERACTIVE CLI WIZARD"
+          print "# =============================================================================="
+          system("cat " build_dir "/interactive.sh")
+          print ""
+          interactive_replaced=1
+      }
+      next
+  }
+  skip_interactive && /^fi$/ { skip_interactive=0; next }
+  skip_interactive { next }
+
+  /if \[\[ -f "\$SCRIPT_DIR\/block_parser.sh" \]\]; then/ {
+      skip_block=1
+      if (!block_parser_replaced) {
+          print ""
+          print "# =============================================================================="
+          print "# EMBEDDED BLOCK PARSER MODULE"
+          print "# =============================================================================="
+          system("cat " build_dir "/block_parser.sh")
+          print ""
+          block_parser_replaced=1
+      }
+      next
+  }
+  skip_block && /^fi$/ { skip_block=0; next }
+  skip_block { next }
   
   { print }
 ' "$SRC_DIR/md2html.sh" > "$TEMP_BUILD_DIR/unified.sh"

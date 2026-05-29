@@ -50,7 +50,7 @@ for test_name in "${test_cases[@]}"; do
     
     # Run the converter
     set +e
-    "$CONVERTER" "$md_file" > "$actual_file" 2>&1
+    "$CONVERTER" --fragment "$md_file" > "$actual_file" 2>&1
     exit_code=$?
     set -e
     
