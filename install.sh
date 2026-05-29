@@ -22,8 +22,39 @@ echo -e "${BOLD}${CYAN}=========================================================
 echo ""
 
 # Get script root directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || pwd)"
 BUILD_SCRIPT="$SCRIPT_DIR/scripts/build.sh"
+
+# Remote installer wrapper:
+# If build.sh is not found locally, we assume the script was executed via curl pipe
+# or downloaded standalone. We clone the repository into a temp directory and run it from there.
+if [[ ! -f "$BUILD_SCRIPT" ]]; then
+    echo -e "${BOLD}${BLUE}🌐 Running remote installation wrapper...${NC}"
+    
+    if ! command -v git >/dev/null 2>&1; then
+        echo -e "${RED}❌ Error: 'git' command not found. Git is required to fetch dependencies for remote installation.${NC}" >&2
+        echo -e "Please clone the repository manually instead:" >&2
+        echo -e "  ${CYAN}git clone https://github.com/hoojinguyen/markdown-to-html.git${NC}" >&2
+        exit 1
+    fi
+    
+    TEMP_DIR=$(mktemp -d -t md2html-install-XXXXXX)
+    echo -e "Fetching latest source code from GitHub..."
+    if git clone --depth 1 https://github.com/hoojinguyen/markdown-to-html.git "$TEMP_DIR" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ Source code fetched successfully.${NC}"
+        # Execute the installer inside the temporary repository clone, passing along all args
+        cd "$TEMP_DIR"
+        ./install.sh "$@"
+        cd - >/dev/null 2>&1
+        rm -rf "$TEMP_DIR"
+        exit 0
+    else
+        echo -e "${RED}❌ Error: Failed to clone the repository from GitHub.${NC}" >&2
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+fi
+
 COMPILED_FILE="$SCRIPT_DIR/dist/md2html"
 
 # Step 1: Run the compilation process
