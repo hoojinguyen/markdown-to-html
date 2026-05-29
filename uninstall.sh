@@ -135,7 +135,7 @@ CONFIRMED=$FORCE
 if ! $CONFIRMED; then
     if [[ $INST_COUNT -gt 0 ]]; then
         echo -n -e "${BOLD}${YELLOW}Are you sure you want to uninstall md2html and remove all detected installations? (y/N): ${NC}"
-        read -r response
+        read -r response < /dev/tty
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             CONFIRMED=true
         else
@@ -144,7 +144,7 @@ if ! $CONFIRMED; then
         fi
     else
         echo -n -e "${BOLD}${YELLOW}Would you like to scan and clean the local repository build artifacts? (y/N): ${NC}"
-        read -r response
+        read -r response < /dev/tty
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             CONFIRMED=true
         else
@@ -190,7 +190,7 @@ if [[ -d "$LOCAL_BUILD" ]]; then
     CLEAN_LOCAL=$FORCE
     if ! $CLEAN_LOCAL; then
         echo -n -e "${BOLD}${YELLOW}Would you like to remove the local build directory inside the repository ('dist/')? (y/N): ${NC}"
-        read -r response
+        read -r response < /dev/tty
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             CLEAN_LOCAL=true
         fi
