@@ -16,6 +16,7 @@ trim() {
 in_code_block=0
 in_paragraph=0
 in_table=0
+in_html_block=0
 current_bq_level=0
 list_stack="" # Format: "type:indent type:indent ..." (stack of open list elements)
 
@@ -64,11 +65,16 @@ close_table() {
     fi
 }
 
+close_html_block() {
+    in_html_block=0
+}
+
 close_all() {
     close_paragraph
     close_lists
     close_blockquote
     close_table
+    close_html_block
 }
 
 # Line-by-Line Block Parser
@@ -119,7 +125,16 @@ parse_block_line() {
     fi
     
     # 3. Horizontal Rules
-    if [[ "$line" =~ ^[[:space:]]*(\*|\-|_)[[:space:]]*\1[[:space:]]*\1[[:space:]]*(\1|[[:space:]])*$ ]]; then
+    # Bash 3.2 (macOS) doesn't support backreferences (\1) in [[ =~ ]], so use explicit patterns
+    local is_hr=0
+    if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*-[[:space:]]*-[-[:space:]]*$ ]]; then
+        is_hr=1
+    elif [[ "$line" =~ ^[[:space:]]*\*[[:space:]]*\*[[:space:]]*\*[*[:space:]]*$ ]]; then
+        is_hr=1
+    elif [[ "$line" =~ ^[[:space:]]*_[[:space:]]*_[[:space:]]*_[_[:space:]]*$ ]]; then
+        is_hr=1
+    fi
+    if [[ $is_hr -eq 1 ]]; then
         close_paragraph
         close_lists
         close_table
@@ -256,7 +271,20 @@ parse_block_line() {
         fi
     fi
 
-    # 6. Standard Paragraph Wrapper
+    # 6. HTML Block Detection
+    # Detect lines starting with HTML block-level tags and pass them through raw.
+    # This handles GitHub-style READMEs that embed raw HTML (e.g. <p align="center">, <img>, <picture>).
+    local _html_block_tags='p|div|section|article|aside|header|footer|nav|main|figure|figcaption|details|summary|h1|h2|h3|h4|h5|h6|table|thead|tbody|tfoot|tr|th|td|ul|ol|li|dl|dt|dd|pre|blockquote|form|fieldset|hr|br|picture|source|img|a|strong|em|b|i|u|span|sub|sup|small|mark|del|ins|abbr|cite|dfn|kbd|samp|var|code|time|data|output|progress|meter|video|audio|canvas|svg|iframe'
+    if [[ "$line" =~ ^[[:space:]]*\<(\/)?($_html_block_tags)([[:space:]]|\>|\/) ]] || [[ "$line" =~ ^[[:space:]]*\<(\/)?($_html_block_tags)\> ]]; then
+        close_paragraph
+        close_lists
+        close_table
+        in_html_block=1
+        echo "$line"
+        return
+    fi
+
+    # 7. Standard Paragraph Wrapper
     if [[ $in_paragraph -eq 0 ]]; then
         close_lists
         if [[ $bq_level -eq 0 ]]; then

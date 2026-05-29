@@ -401,6 +401,11 @@ while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
     if [[ "$raw_line" =~ ^(#+)[[:space:]] || "$raw_line" =~ ^[[:space:]]*[-*+][[:space:]] || "$raw_line" =~ ^[[:space:]]*[0-9]+\.[[:space:]] || "$raw_line" =~ ^[[:space:]]*\> || -z "$(trim "$raw_line")" ]]; then
         is_block=1
     fi
+    # Detect HTML block-level tags as block elements so they bypass the text buffer
+    _html_block_tags_main='p|div|section|article|aside|header|footer|nav|main|figure|figcaption|details|summary|h1|h2|h3|h4|h5|h6|table|thead|tbody|tfoot|tr|th|td|ul|ol|li|dl|dt|dd|pre|blockquote|form|fieldset|hr|br|picture|source|img|a|strong|em|b|i|u|span|sub|sup|small|mark|del|ins|abbr|cite|dfn|kbd|samp|var|code|time|data|output|progress|meter|video|audio|canvas|svg|iframe'
+    if [[ "$raw_line" =~ ^[[:space:]]*\<(\/)?($_html_block_tags_main)([[:space:]]|\>|\/) ]] || [[ "$raw_line" =~ ^[[:space:]]*\<(\/)?($_html_block_tags_main)\> ]]; then
+        is_block=1
+    fi
     
     if [[ $is_block -eq 1 ]]; then
         process_buffer

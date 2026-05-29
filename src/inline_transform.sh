@@ -40,7 +40,28 @@ inline_transform() {
 
     # 2. Escape raw HTML if --raw-html is NOT specified (raw_html is read globally)
     local raw_html_val="${raw_html:-0}"
+    local tags=()
     if [[ $raw_html_val -eq 0 ]]; then
+        local tag_count=0
+        local url_re='^<https?://[^>]+>$'
+        local mail_re='^<[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}>$'
+        while IFS= read -r tag; do
+            if [[ -n "$tag" ]]; then
+                # Skip automatic links
+                if [[ "$tag" =~ $url_re ]] || [[ "$tag" =~ $mail_re ]]; then
+                    continue
+                fi
+                tags+=("$tag")
+                local placeholder="HTMLTAGPLACEHOLDER_${tag_count}"
+                local prefix="${line%%"$tag"*}"
+                if [[ "$prefix" != "$line" ]]; then
+                    local suffix="${line:${#prefix}+${#tag}}"
+                    line="${prefix}${placeholder}${suffix}"
+                fi
+                ((tag_count++))
+            fi
+        done < <(echo "$line" | grep -o -E "<[a-zA-Z/][^>]*>" || true)
+        
         line=$(escape_html "$line")
     fi
 
@@ -133,6 +154,20 @@ inline_transform() {
     line="${line//ESCAPEDLPAREN/\(}"
     line="${line//ESCAPEDRPAREN/\)}"
     line="${line//ESCAPEDBACKSLASH/\\}"
+
+    # 12. Restore preserved HTML tags
+    if [[ $raw_html_val -eq 0 && ${#tags[@]} -gt 0 ]]; then
+        local idx=0
+        for tag in "${tags[@]}"; do
+            local placeholder="HTMLTAGPLACEHOLDER_${idx}"
+            local prefix="${line%%"$placeholder"*}"
+            if [[ "$prefix" != "$line" ]]; then
+                local suffix="${line:${#prefix}+${#placeholder}}"
+                line="${prefix}${tag}${suffix}"
+            fi
+            ((idx++))
+        done
+    fi
 
     echo -n "$line"
 }
