@@ -1,0 +1,14 @@
+.agents
+dist/
+
+# OS metadata
+.DS_Store
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
+
+# Test actual outputs
+*_actual.html
+scripts/temp_build_*
