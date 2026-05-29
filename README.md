@@ -8,6 +8,12 @@ A high-performance, robust, pure-Bash utility designed to compile Markdown docum
 curl -fsSL https://raw.githubusercontent.com/hoojinguyen/markdown-to-html/main/install.sh | bash
 ```
 
+## How to Uninstall
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hoojinguyen/markdown-to-html/main/uninstall.sh | bash
+```
+
 ## How to Use
 ```bash
 md2html
