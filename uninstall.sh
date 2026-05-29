@@ -15,6 +15,38 @@ MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
+# Helper function to read input safely in all environments (piped, interactive, or sandboxed)
+smart_read() {
+    local prompt_msg="$1"
+    local var_name="$2"
+    local response=""
+    
+    echo -n -e "$prompt_msg"
+    
+    if [ -t 0 ]; then
+        # Stdin is a TTY, read directly
+        read -r response
+    elif sh -c ": >/dev/tty" >/dev/null 2>/dev/null; then
+        # Stdin is redirected, but controlling terminal is accessible
+        read -r response < /dev/tty
+    else
+        # Stdin is redirected and no controlling terminal is configured/accessible
+        echo -e "\n${RED}Error: This environment is non-interactive and cannot read keyboard input.${NC}" >&2
+        echo -e "To run this script interactively, please use one of these methods:\n" >&2
+        echo -e "  1. Use Process Substitution (recommended):" >&2
+        echo -e "     ${CYAN}bash <(curl -fsSL https://raw.githubusercontent.com/hoojinguyen/markdown-to-html/main/uninstall.sh)${NC}" >&2
+        echo -e "  2. Download and execute directly:" >&2
+        echo -e "     ${CYAN}curl -fsSL https://raw.githubusercontent.com/hoojinguyen/markdown-to-html/main/uninstall.sh -o uninstall.sh${NC}" >&2
+        echo -e "     ${CYAN}chmod +x uninstall.sh && ./uninstall.sh && rm uninstall.sh${NC}" >&2
+        echo -e "  3. Run non-interactively (automatic removal):" >&2
+        echo -e "     ${CYAN}curl -fsSL https://raw.githubusercontent.com/hoojinguyen/markdown-to-html/main/uninstall.sh | bash -s -- --yes${NC}\n" >&2
+        exit 1
+    fi
+    
+    # Assign the captured value back to the variable name passed as argument
+    eval "$var_name=\"\$response\""
+}
+
 # Print header
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
 echo -e "${BOLD}${MAGENTA}       Markdown-to-HTML Converter (md2html) Uninstaller${NC}"
@@ -134,8 +166,7 @@ echo ""
 CONFIRMED=$FORCE
 if ! $CONFIRMED; then
     if [[ $INST_COUNT -gt 0 ]]; then
-        echo -n -e "${BOLD}${YELLOW}Are you sure you want to uninstall md2html and remove all detected installations? (y/N): ${NC}"
-        read -r response < /dev/tty
+        smart_read "${BOLD}${YELLOW}Are you sure you want to uninstall md2html and remove all detected installations? (y/N): ${NC}" response
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             CONFIRMED=true
         else
@@ -143,8 +174,7 @@ if ! $CONFIRMED; then
             exit 0
         fi
     else
-        echo -n -e "${BOLD}${YELLOW}Would you like to scan and clean the local repository build artifacts? (y/N): ${NC}"
-        read -r response < /dev/tty
+        smart_read "${BOLD}${YELLOW}Would you like to scan and clean the local repository build artifacts? (y/N): ${NC}" response
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             CONFIRMED=true
         else
@@ -189,8 +219,7 @@ LOCAL_BUILD="$SCRIPT_DIR/dist"
 if [[ -d "$LOCAL_BUILD" ]]; then
     CLEAN_LOCAL=$FORCE
     if ! $CLEAN_LOCAL; then
-        echo -n -e "${BOLD}${YELLOW}Would you like to remove the local build directory inside the repository ('dist/')? (y/N): ${NC}"
-        read -r response < /dev/tty
+        smart_read "${BOLD}${YELLOW}Would you like to remove the local build directory inside the repository ('dist/')? (y/N): ${NC}" response
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
             CLEAN_LOCAL=true
         fi
